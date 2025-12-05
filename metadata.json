@@ -1,0 +1,7 @@
+{
+  "name": "MakeIt",
+  "description": "Scan objects to learn how they are made and how to build them yourself.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
