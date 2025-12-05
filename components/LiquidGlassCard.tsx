@@ -1,4 +1,5 @@
 import React from 'react';
+import { triggerHaptic } from '../services/hapticService';
 
 interface LiquidGlassCardProps {
   children: React.ReactNode;
@@ -13,9 +14,17 @@ export const LiquidGlassCard: React.FC<LiquidGlassCardProps> = ({
   onClick,
   hoverEffect = false
 }) => {
+  
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      triggerHaptic('light');
+      onClick(e);
+    }
+  };
+
   return (
     <div 
-      onClick={onClick}
+      onClick={handleClick}
       className={`
         relative overflow-hidden rounded-2xl
         bg-white/60 dark:bg-white/5

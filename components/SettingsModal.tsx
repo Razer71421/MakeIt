@@ -3,6 +3,7 @@ import { X, Key, Shield, Info } from 'lucide-react';
 import { LiquidGlassCard } from './LiquidGlassCard';
 import { SocialButton } from './SocialButton';
 import { setApiKey, hasApiKey } from '../services/geminiService';
+import { triggerHaptic } from '../services/hapticService';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -13,19 +14,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    // Check if env var is used (mock check)
     if (hasApiKey()) {
         setIsSaved(true);
     }
   }, []);
 
   const handleSave = () => {
+    triggerHaptic('success');
     if (key.trim()) {
       setApiKey(key.trim());
       setIsSaved(true);
-      // In a real app, save to localStorage securely or state
-      alert("API Key Set!");
+      // Visual feedback
+      const btn = document.getElementById('save-btn');
+      if (btn) {
+          btn.innerText = "Saved!";
+          setTimeout(() => btn.innerText = "Save", 2000);
+      }
+    } else {
+        // If empty, clear it
+        setApiKey('');
+        setIsSaved(false);
     }
+  };
+
+  const handleClose = () => {
+    triggerHaptic('light');
+    onClose();
   };
 
   return (
@@ -33,7 +47,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
       <LiquidGlassCard className="w-full max-w-md !bg-white/90 dark:!bg-[#1A1A1A]/95 p-0 overflow-hidden shadow-2xl">
         <div className="p-4 border-b border-gray-200/50 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
           <h2 className="font-bold text-lg text-gray-800 dark:text-white">Settings</h2>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
+          <button onClick={handleClose} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors">
             <X size={20} className="text-gray-500 dark:text-gray-400" />
           </button>
         </div>
@@ -44,7 +58,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
              <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
              <div className="text-sm text-blue-800 dark:text-blue-200">
                <p className="font-bold mb-1">Developer Mode</p>
-               <p className="opacity-90">This app uses Google Gemini 2.5 Flash (Free Tier). To use the scanning feature, ensure the API key is configured.</p>
+               <p className="opacity-90">This app uses Google Gemini 2.5 Flash (Free Tier). To use the scanning feature, ensure the API key is configured in settings or environment variables.</p>
              </div>
           </div>
 
@@ -57,12 +71,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                  type="password" 
                  value={key}
                  onChange={(e) => setKey(e.target.value)}
-                 placeholder={isSaved ? "Key is set (hidden)" : "Enter API Key"}
+                 placeholder={isSaved ? "Key is configured (hidden)" : "Enter API Key"}
                  className="flex-1 bg-white dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-900 dark:text-white placeholder-gray-400 shadow-inner"
                />
                <button 
+                 id="save-btn"
                  onClick={handleSave}
-                 className="bg-gray-900 dark:bg-white text-white dark:text-black px-5 rounded-xl text-sm font-bold shadow-lg active:scale-95 transition-transform"
+                 className="bg-gray-900 dark:bg-white text-white dark:text-black px-5 rounded-xl text-sm font-bold shadow-lg active:scale-95 transition-transform min-w-[80px]"
                >
                  Save
                </button>

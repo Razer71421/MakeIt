@@ -9,6 +9,7 @@ import { LiquidGlassCard } from './components/LiquidGlassCard';
 import { SocialButton } from './components/SocialButton';
 import { ScanResult, AppScreen } from './types';
 import { saveScan, getHistory } from './services/storageService';
+import { triggerHaptic } from './services/hapticService';
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('onboarding');
@@ -34,6 +35,7 @@ const App: React.FC = () => {
   }, []);
 
   const toggleTheme = () => {
+    triggerHaptic('medium');
     const newTheme = !isDark;
     setIsDark(newTheme);
     if (newTheme) {
@@ -62,7 +64,25 @@ const App: React.FC = () => {
     setCurrentScreen('result');
   };
 
-  const navigateHome = () => setCurrentScreen('home');
+  const navigateHome = () => {
+    triggerHaptic('light');
+    setCurrentScreen('home');
+  };
+
+  const openSettings = () => {
+    triggerHaptic('light');
+    setIsSettingsOpen(true);
+  };
+  
+  const openHistory = () => {
+    triggerHaptic('light');
+    setCurrentScreen('history');
+  };
+
+  const openCamera = () => {
+    // Already handled by LiquidGlassCard, but if called directly:
+    setCurrentScreen('camera');
+  };
 
   if (currentScreen === 'onboarding') {
     return <Onboarding onComplete={handleOnboardingComplete} />;
@@ -106,14 +126,14 @@ const App: React.FC = () => {
            
            {currentScreen === 'home' && (
              <button 
-               onClick={() => setCurrentScreen('history')}
+               onClick={openHistory}
                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors"
              >
                <HistoryIcon className="w-5 h-5" />
              </button>
            )}
            <button 
-             onClick={() => setIsSettingsOpen(true)}
+             onClick={openSettings}
              className="p-2 -mr-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors"
            >
              <Settings className="w-5 h-5" />
@@ -137,7 +157,7 @@ const App: React.FC = () => {
               </p>
             </div>
 
-            <div className="relative group cursor-pointer" onClick={() => setCurrentScreen('camera')}>
+            <div className="relative group cursor-pointer" onClick={openCamera}>
               <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-3xl group-hover:blur-3xl transition-all duration-500 opacity-70"></div>
               
               <LiquidGlassCard className="w-24 h-24 rounded-full flex items-center justify-center !border-white/50 dark:!border-white/20 group-hover:scale-105 active:scale-95 !shadow-2xl shadow-blue-500/20">

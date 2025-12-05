@@ -3,6 +3,7 @@ import { ScanResult } from '../types';
 import { LiquidGlassCard } from './LiquidGlassCard';
 import { SocialButton } from './SocialButton';
 import { Clock, AlertTriangle, PenTool, Layers, CheckCircle, Share2, Download, Lock, ChevronDown } from 'lucide-react';
+import { triggerHaptic } from '../services/hapticService';
 
 interface ResultViewProps {
   result: ScanResult;
@@ -11,6 +12,21 @@ interface ResultViewProps {
 export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'make'>('overview');
   const [showPremium, setShowPremium] = useState(false);
+
+  const handleTabChange = (tab: 'overview' | 'make') => {
+    triggerHaptic('light');
+    setActiveTab(tab);
+  };
+
+  const handlePremiumOpen = () => {
+    triggerHaptic('medium');
+    setShowPremium(true);
+  };
+
+  const handlePremiumClose = () => {
+    triggerHaptic('light');
+    setShowPremium(false);
+  };
 
   return (
     <div className="pb-20 min-h-full animate-slide-up">
@@ -32,25 +48,32 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
         </div>
       </div>
 
-      {/* Floating Tabs */}
-      <div className="px-6 -mt-6 relative z-20">
-        <LiquidGlassCard className="p-1 flex !rounded-2xl !bg-white/80 dark:!bg-black/60">
+      {/* Floating Animated Tabs */}
+      <div className="px-6 -mt-8 relative z-20">
+        <LiquidGlassCard className="p-1.5 flex relative !rounded-2xl !bg-white/80 dark:!bg-black/60 !border-white/40 dark:!border-white/10 shadow-xl backdrop-blur-xl">
+          {/* Sliding Background Indicator */}
+          <div 
+            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-white dark:bg-white/20 shadow-md shadow-black/5 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) ${
+                activeTab === 'overview' ? 'left-1.5 translate-x-0' : 'left-1.5 translate-x-[100%] ml-1.5'
+            }`}
+          />
+          
           <button
-            onClick={() => setActiveTab('overview')}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${
+            onClick={() => handleTabChange('overview')}
+            className={`flex-1 relative z-10 py-3 text-sm font-bold text-center transition-colors duration-300 ${
               activeTab === 'overview' 
-                ? 'bg-white dark:bg-white/20 text-black dark:text-white shadow-md' 
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'text-black dark:text-white' 
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
             Overview
           </button>
           <button
-            onClick={() => setActiveTab('make')}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${
+            onClick={() => handleTabChange('make')}
+            className={`flex-1 relative z-10 py-3 text-sm font-bold text-center transition-colors duration-300 ${
               activeTab === 'make' 
-                ? 'bg-white dark:bg-white/20 text-black dark:text-white shadow-md' 
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'text-black dark:text-white' 
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
             DIY Guide
@@ -196,7 +219,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
            </LiquidGlassCard>
            
            <button 
-             onClick={() => setShowPremium(true)}
+             onClick={handlePremiumOpen}
              className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center space-x-2 active:opacity-90 relative overflow-hidden shadow-lg shadow-blue-500/30 transition-transform active:scale-95"
            >
              <Download size={18} />
@@ -239,10 +262,10 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
                         <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> Cloud Sync
                     </div>
                     </div>
-                    <button className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 mb-3 hover:scale-[1.02] transition-transform">
+                    <button onClick={handlePremiumOpen} className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 mb-3 hover:scale-[1.02] transition-transform">
                     Upgrade for $2.99
                     </button>
-                    <button onClick={() => setShowPremium(false)} className="text-gray-400 dark:text-gray-500 text-sm font-medium hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                    <button onClick={handlePremiumClose} className="text-gray-400 dark:text-gray-500 text-sm font-medium hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                     Maybe Later
                     </button>
                 </div>

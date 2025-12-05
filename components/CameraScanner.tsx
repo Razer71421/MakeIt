@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Camera, X, Zap } from 'lucide-react';
 import { analyzeImage } from '../services/geminiService';
+import { triggerHaptic } from '../services/hapticService';
 import { ScanResult } from '../types';
 
 interface CameraScannerProps {
@@ -48,6 +49,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onScanComplete, on
   const captureAndAnalyze = async () => {
     if (!videoRef.current || !canvasRef.current) return;
 
+    triggerHaptic('light'); // Initial feedback for button press
     setIsProcessing(true);
 
     // Draw video frame to canvas
@@ -68,12 +70,20 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onScanComplete, on
       video.pause();
       
       const result = await analyzeImage(base64Image);
+      
+      triggerHaptic('success'); // Success feedback
       onScanComplete(result);
     } catch (err: any) {
+      triggerHaptic('error'); // Error feedback
       setError(err.message || "Failed to analyze object.");
       setIsProcessing(false);
       video.play(); // Resume if failed
     }
+  };
+
+  const handleCancel = () => {
+    triggerHaptic('medium');
+    onCancel();
   };
 
   return (
@@ -89,7 +99,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onScanComplete, on
         {error ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center">
              <p className="mb-4">{error}</p>
-             <button onClick={onCancel} className="px-4 py-2 bg-gray-800 rounded-lg">Close</button>
+             <button onClick={handleCancel} className="px-4 py-2 bg-gray-800 rounded-lg">Close</button>
           </div>
         ) : (
           <video 
@@ -106,7 +116,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onScanComplete, on
         <div className="absolute inset-0 pointer-events-none">
           {/* Header */}
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start pt-8 bg-gradient-to-b from-black/50 to-transparent">
-             <button onClick={onCancel} className="pointer-events-auto p-2 rounded-full bg-black/20 text-white backdrop-blur-md">
+             <button onClick={handleCancel} className="pointer-events-auto p-2 rounded-full bg-black/20 text-white backdrop-blur-md active:bg-black/40 transition-colors">
                <X size={24} />
              </button>
              <div className="px-3 py-1 rounded-full bg-black/30 backdrop-blur-md text-xs font-medium text-white/80 border border-white/10">

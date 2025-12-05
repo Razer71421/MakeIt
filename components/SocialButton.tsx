@@ -1,5 +1,6 @@
 import React from 'react';
 import { Instagram } from 'lucide-react';
+import { triggerHaptic } from '../services/hapticService';
 
 interface SocialButtonProps {
   username: string;
@@ -11,6 +12,7 @@ export const SocialButton: React.FC<SocialButtonProps> = ({ username }) => {
       href={`https://instagram.com/${username}`}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => triggerHaptic('light')}
       className="group relative flex items-center gap-3 p-3 rounded-xl
                  bg-white/50 dark:bg-white/5 
                  border border-gray-200/50 dark:border-white/10

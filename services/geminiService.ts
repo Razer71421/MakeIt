@@ -1,12 +1,43 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ScanResult } from "../types";
 
-// This is a placeholder. In a real app, you might want to proxy this or require user input.
-// For this demo, we assume the user might provide one via Settings or we use env if available.
-let API_KEY = process.env.API_KEY || '';
+const LOCAL_STORAGE_KEY = 'makeit_gemini_api_key';
+
+// Helper to get API key from various sources (Env vars or LocalStorage)
+const getInitialApiKey = (): string => {
+  // 1. Check LocalStorage (User override)
+  const localKey = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (localKey) return localKey;
+
+  // 2. Check Environment Variables (Build time / Vercel)
+  // We check multiple common prefixes for compatibility with CRA, Vite, etc.
+  // @ts-ignore - Process might not be defined in all environments, but is standard for builds
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.REACT_APP_API_KEY || 
+           process.env.VITE_API_KEY || 
+           process.env.NEXT_PUBLIC_API_KEY || 
+           process.env.API_KEY || 
+           '';
+  }
+  
+  // @ts-ignore - Vite specific
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // @ts-ignore
+    return import.meta.env.VITE_API_KEY || '';
+  }
+
+  return '';
+};
+
+let API_KEY = getInitialApiKey();
 
 export const setApiKey = (key: string) => {
   API_KEY = key;
+  if (key) {
+    localStorage.setItem(LOCAL_STORAGE_KEY, key);
+  } else {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  }
 };
 
 export const hasApiKey = () => !!API_KEY;

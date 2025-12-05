@@ -4,6 +4,7 @@ import { LiquidGlassCard } from './LiquidGlassCard';
 import { SocialButton } from './SocialButton';
 import { getHistory, deleteScan } from '../services/storageService';
 import { Trash2, ChevronRight, Clock } from 'lucide-react';
+import { triggerHaptic } from '../services/hapticService';
 
 interface HistoryViewProps {
   onSelect: (result: ScanResult) => void;
@@ -18,6 +19,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ onSelect }) => {
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
+    triggerHaptic('medium');
     deleteScan(id);
     setHistory(getHistory());
   };
